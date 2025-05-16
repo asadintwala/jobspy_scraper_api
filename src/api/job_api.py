@@ -9,9 +9,23 @@
 """Job API endpoints."""
 from typing import List, Any
 import math
+import logging
 from fastapi import APIRouter, HTTPException, Query
 from jobspy import scrape_jobs
 from src.models.job_models import DescriptionFormat, JobResponse, JobSearchParams
+from pydantic import BaseModel
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+class JobSearchResponse(BaseModel):
+    """Response model for job search results."""
+    total_results: int
+    jobs: List[JobResponse]
 
 router = APIRouter()
 
@@ -23,23 +37,23 @@ def handle_nan(value: Any) -> Any:
     return value
 
 
-@router.get("/jobs", response_model=List[JobResponse])
+@router.get("/jobs", response_model=JobSearchResponse)
 async def get_jobs(
     site_name: str = Query(
-        default="linkedin,indeed,zip_recruiter,glassdoor,google,bayt",
-        description="Job sites to search. Example: linkedin,indeed",
+        default="linkedin,indeed,glassdoor,google",
+        description="Job sites to search. Ex: linkedin,indeed,glassdoor,google,zip_recruiter,naukri,bayt",
     ),
     search_term: str = Query(
         default=None,
-        description="Search term for job titles. Example: software engineer,python developer",
+        description="Search term for job titles. Ex: software engineer,python developer",
     ),
     google_search_term: str = Query(
         default=None,
-        description="Specific search term for Google Jobs. Example: software engineer jobs in New York since yesterday",
+        description="Specific search term for Google Jobs. Ex: software engineer jobs in New York since yesterday",
     ),
     location: str = Query(
         default=None,
-        description="Location to search in. Example: San Francisco, CA,New York, NY",
+        description="Location to search in. Ex: San Francisco, New York",
     ),
     distance: int = Query(
         default=50,
@@ -47,11 +61,11 @@ async def get_jobs(
     ),
     job_type: str = Query(
         default=None,
-        description="Type of job position. Example: fulltime,parttime,contract",
+        description="Type of job position. Ex: fulltime,parttime,contract",
     ),
     proxies: str = Query(
         default=None,
-        description="List of proxies. Example: user:pass@host:port,localhost",
+        description="List of proxies. Ex: user:pass@host:port,localhost",
     ),
     is_remote: bool = Query(
         default=None,
@@ -103,7 +117,7 @@ async def get_jobs(
         default=None,
         description="Path to CA Certificate file. Example: /path/to/cert.pem",
     ),
-) -> List[JobResponse]:
+) -> JobSearchResponse:
     """
     Search for jobs across multiple job sites.
 
@@ -120,6 +134,8 @@ async def get_jobs(
         HTTPException: If there's an error in the search parameters or job scraping.
     """
     try:
+        logger.info(f"Starting job search with parameters: site_name={site_name}, search_term={search_term}, location={location}")
+        
         # Convert linkedin_company_ids from string to list
         if linkedin_company_ids:
             linkedin_company_ids = [int(id.strip()) for id in linkedin_company_ids.split(",")]
@@ -131,11 +147,14 @@ async def get_jobs(
         sites = [site.strip() for site in site_name.split(",")] if site_name else []
 
         all_results = []
+        total_jobs = 0
 
         # Iterate through all combinations of search parameters
         for search_term in search_terms:
             for location in locations:
                 for job_type in job_types:
+                    logger.info(f"Searching jobs with: term={search_term}, location={location}, type={job_type}")
+                    
                     # Validate parameters
                     params = JobSearchParams(
                         site_name=sites,
@@ -161,15 +180,23 @@ async def get_jobs(
 
                     # Perform job search
                     jobs = scrape_jobs(**params.model_dump(exclude_none=True))
+                    total_jobs += len(jobs)
+                    logger.info(f"Found {len(jobs)} jobs from current search")
 
                     # Convert to response model
                     for _, job in jobs.iterrows():
+                        # Handle location properly
+                        job_location = handle_nan(job.get("location", ""))
+                        if not job_location:
+                            city = handle_nan(job.get("city", ""))
+                            state = handle_nan(job.get("state", ""))
+                            job_location = ", ".join(filter(None, [city, state]))
+
                         result = JobResponse(
-                            total_results=len(jobs),
                             source_website=handle_nan(job.get("site", "")),
                             job_title=handle_nan(job.get("title", "")),
-                            company=handle_nan(job.get("company", "")),
-                            location=f"{handle_nan(job.get('city', ''))}, {handle_nan(job.get('state', ''))}",
+                            company=handle_nan(job.get("company")) or "Unknown Company",
+                            location=job_location,
                             date_posted=str(handle_nan(job.get("date_posted", ""))),
                             job_type=handle_nan(job.get("job_type")),
                             salary=handle_nan(job.get("min_amount") or job.get("max_amount")),
@@ -180,12 +207,17 @@ async def get_jobs(
                         )
                         all_results.append(result)
 
-        return all_results
+        logger.info(f"Total jobs found: {total_jobs}")
+        return JobSearchResponse(
+            total_results=total_jobs,
+            jobs=all_results
+        )
 
-    except ValueError as e: # handling issues like invalid parameters
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e)) from e
         
-    
-    except Exception as e: # catch all of unexpected errors during job search
+    except Exception as e:
+        logger.error(f"Unexpected error during job search: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error searching jobs: {str(e)}") from e
     

@@ -4,4 +4,8 @@ pydantic==2.6.1
 python-dotenv==1.0.1
 pytest==8.0.0
 black==24.1.1
-isort==5.13.2 
+isort==5.13.2
+aiohttp
+tenacity
+pydantic_settings
+slowapi==0.1.8

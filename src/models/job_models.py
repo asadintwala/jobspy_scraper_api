@@ -23,10 +23,9 @@ class DescriptionFormat(str, Enum):
 class JobResponse(BaseModel):
     """Response model for job data."""
 
-    total_results: int = Field(..., description="Total number of jobs found")
     source_website: str = Field(..., description="Website where the job was found")
     job_title: str = Field(..., description="Title of the job")
-    company: str = Field(..., description="Company name")
+    company: Optional[str] = Field(None, description="Company name")
     location: str = Field(..., description="Job location")
     date_posted: str = Field(..., description="Date when the job was posted")
     job_type: Optional[str] = Field(None, description="Type of job (fulltime, parttime, etc.)")
@@ -41,7 +40,6 @@ class JobSearchParams(BaseModel):
     """Parameters for job search."""
 
     site_name: Optional[Union[List[str], str]] = Field(
-        default=["linkedin", "indeed", "zip_recruiter", "glassdoor", "google", "bayt"],
         description="Job sites to search. Example: linkedin,indeed",
     )
     search_term: Optional[str] = Field(
@@ -162,5 +160,4 @@ class JobSearchParams(BaseModel):
             return v
         if isinstance(v, str):
             v = [p.strip() for p in v.split(",")]
-        return v 
-                    
+        return v
