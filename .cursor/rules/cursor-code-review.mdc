@@ -1,0 +1,185 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Setting Up a Code Reviewer Agent in Cursor
+
+## Overview
+
+This document provides step-by-step instructions for configuring a code reviewer agent in Cursor that will enforce API guidelines, ensure code quality, and identify security issues in your team's Python FastAPI codebase. This agent will serve as your mission-critical code reviewer to maintain high standards across your development team.
+
+## Prerequisites
+
+- Development workstations with Windows, macOS, or Linux
+- Internet connectivity for AI model access
+- GitHub, BitBucket, or GitLab repository for your codebase
+
+## Step 1: Install Cursor
+
+1. Download Cursor from the official website: https://cursor.com/
+2. Install for your respective operating system:
+   - **Windows**: Run the installer and follow the prompts
+   - **macOS**: Drag the application to your Applications folder
+   - **Linux**: Follow distribution-specific installation instructions
+3. Launch Cursor after installation
+4. Sign in or create an account if required
+
+## Step 2: Create the Code Reviewer System Prompt
+
+1. Create a file named `.cursorrules` in the root of your repository
+2. Add the following structure to the file:
+
+```
+name: Python FastAPI Code Reviewer
+description: Expert code reviewer specializing in Python, FastAPI, and database systems that enforces API guidelines
+system: |
+  # Python FastAPI and Database Expert Code Reviewer System Prompt
+
+  ## Core Role and Responsibilities
+
+  You are an expert code reviewer specialized in Python, with deep expertise in FastAPI, RESTful APIs, database systems, and modern Python development. Your primary mission is to ensure code quality, security, and adherence to established API guidelines for a mission-critical codebase. Your reviews are thorough, constructive, and educational, always balancing immediate tactical feedback with strategic architectural guidance.
+
+  You can review entire codebases, multiple files simultaneously, and integrate with CI/CD pipelines on GitHub, BitBucket, GitLab, or other code management platforms. You excel at analyzing the relationships between code components across a complete system architecture.
+
+  [PASTE THE REMAINDER OF YOUR SYSTEM PROMPT HERE]
+```
+
+3. Replace `[PASTE THE REMAINDER OF YOUR SYSTEM PROMPT HERE]` with the content from your system prompt artifact
+4. Save the file and commit it to your repository to share with your team
+
+## Step 3: Configure Cursor for Team Usage
+
+1. Ensure all team members install Cursor using Step 1
+2. Make the `.cursorrules` file accessible to all team members by:
+   - Including it in your version control repository
+   - Ensuring it's pulled during repository cloning
+3. Create a team documentation page explaining:
+   - How to use the code reviewer agent
+   - When to use it (e.g., before commits, during development)
+   - How to interpret and act on review feedback
+
+## Step 4: Using the Code Reviewer
+
+### Basic Usage
+1. Open your project in Cursor
+2. Press `Cmd+I` (macOS) or `Ctrl+I` (Windows/Linux) to open the Composer
+3. Select "Agent" mode from the dropdown at the top of the Composer
+4. Type a prompt such as:
+   - "Review my code for compliance with our API guidelines"
+   - "Check my FastAPI implementation for security issues"
+   - "Review the database queries in this module for performance issues"
+5. The agent will analyze your codebase and provide a comprehensive review
+
+### For Specific Files
+1. Open the files you want to review
+2. Select code snippets or entire files
+3. Press `Cmd+I` / `Ctrl+I` to open the Composer
+4. Select "Agent" mode
+5. Request a review of the selected code
+
+### For Full Repository Reviews
+1. Open your project in Cursor
+2. Press `Cmd+I` / `Ctrl+I` to open the Composer
+3. Select "Agent" mode
+4. Type: "Perform a comprehensive review of the entire codebase for compliance with our API guidelines"
+5. The agent will analyze all relevant files
+
+## Step 5: Integration with Development Workflow
+
+### Pre-commit Reviews
+Instruct developers to run the agent before committing code:
+
+1. Develop code as usual
+2. Before committing, open Cursor and use the agent to review changes
+3. Address issues identified by the agent
+4. Commit only after resolving critical issues
+
+### Pull Request Reviews
+Integrate the agent into your pull request process:
+
+1. Developer creates a pull request
+2. Reviewer uses Cursor to open the PR branch
+3. Reviewer uses the agent to perform an initial code review
+4. Reviewer supplements the agent's review with human expertise
+5. Developer addresses both automated and human feedback
+
+### Continuous Integration
+For more advanced setups, you can:
+
+1. Create a CI script that runs Cursor in headless mode
+2. Configure the script to analyze code and generate review reports
+3. Add this script as a step in your CI/CD pipeline
+4. Have results posted as comments on pull requests
+
+## Step 6: Customizing the Reviewer for Your Project
+
+Enhance the code reviewer agent for your specific needs:
+
+1. Update the `.cursorrules` file with project-specific requirements:
+   - Add examples of your coding standards
+   - Reference your specific database systems
+   - Include custom error messages or severity classifications
+
+2. Add project-specific guidelines:
+   ```
+   // Add to your .cursorrules file
+   
+   ## Project-Specific Guidelines
+   
+   1. Always use async/await for database operations
+   2. Follow our established error handling pattern with proper status codes
+   3. Ensure all endpoints are properly documented with OpenAPI
+   4. All database models must include created_at and updated_at fields
+   ```
+
+3. Commit these changes to share with your team
+
+## Step 7: Feedback Loop and Improvement
+
+Establish a process to continually improve the code reviewer:
+
+1. Create a dedicated channel or issue tracker for feedback on the code reviewer
+2. Regularly review feedback from team members
+3. Update the `.cursorrules` file to address common issues or missed checks
+4. Track the positive impact on code quality over time
+
+## Troubleshooting
+
+### Agent Provides Incorrect Recommendations
+- Verify your `.cursorrules` file is correctly formatted
+- Ensure the agent has access to all relevant files
+- Add more specific examples to the system prompt
+- Provide clearer review criteria
+
+### Agent Misses Important Issues
+- Update the system prompt to emphasize missed issue types
+- Add specific examples of issues that should be flagged
+- Include additional reference materials or guidelines
+
+### Performance Issues with Large Codebases
+- Focus the agent on specific directories or components
+- Use more targeted review prompts
+- Break reviews into smaller, focused sessions
+
+## Best Practices
+
+1. **Start Small**: Begin with reviewing small components to build trust in the system
+2. **Human Oversight**: Always have senior developers validate the agent's reviews initially
+3. **Continuous Improvement**: Regularly update the system prompt based on feedback
+4. **Clear Guidelines**: Ensure team members understand when to use the agent
+5. **Integration**: Make the code reviewer a natural part of your development workflow
+6. **Balanced Feedback**: Encourage the agent to highlight positive aspects as well as issues
+7. **Educational Approach**: Use reviews as learning opportunities for the team
+
+## Resources
+
+- Cursor Documentation: https://cursor.com/docs
+- Python Best Practices: https://docs.python-guide.org/
+- FastAPI Documentation: https://fastapi.tiangolo.com/
+- Database Best Practices for supported systems:
+  - PostgreSQL: https://www.postgresql.org/docs/
+  - MongoDB: https://docs.mongodb.com/
+  - Neo4j: https://neo4j.com/docs/
+  - Cassandra: https://cassandra.apache.org/doc/
+
