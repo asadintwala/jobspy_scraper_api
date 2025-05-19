@@ -6,7 +6,7 @@ def setup_logging():
     '''Function to configure and initialize logging for the application'''
     # Set up basic configuration for logging
     logging.basicConfig(
-        level=logging.INFO, # Set the logging level to INFO (you can change it to DEBUG, WARNING, etc.)
+        level=logging.INFO, # Set the logging level to INFO (can change it to DEBUG, WARNING, etc.)
         # Define the format of log messages
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         # Define the handlers that determine where logs are output

@@ -56,7 +56,8 @@ class JobSearchParams(BaseModel):
     )
     google_search_term: Optional[str] = Field(
         default=None,
-        description="Specific search term for Google Jobs. Example: software engineer jobs in New York since yesterday",
+        description="""Specific search term for Google Jobs.
+        Example: software engineer jobs in New York since yesterday""",
     )
     location: Optional[str] = Field(
         default=None,

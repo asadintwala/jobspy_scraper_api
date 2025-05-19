@@ -1,3 +1,5 @@
+# pylint: disable=too-few-public-methods
+
 '''importing required modules.'''
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv

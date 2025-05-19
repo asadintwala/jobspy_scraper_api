@@ -5,12 +5,14 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-positional-arguments
 # pylint: disable=unused-argument
+# pylint: disable=too-few-public-methods
 
 """MongoDB database connection and operations."""
 import logging
 import uuid
 from typing import Optional
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
+from pymongo import AsyncMongoClient
+
 from src.core.config import settings
 from src.models.log_models import RequestLog
 
@@ -19,15 +21,15 @@ logger = logging.getLogger(__name__)
 class MongoDB:
     """MongoDB client for database operations."""
 
-    client: Optional[AsyncIOMotorClient] = None
-    db: Optional[AsyncIOMotorDatabase] = None
-    collection: Optional[AsyncIOMotorCollection] = None
+    client: Optional[AsyncMongoClient] = None
+    db: Optional[AsyncMongoClient] = None
+    collection: Optional[AsyncMongoClient] = None
 
     @classmethod
     async def connect_to_mongodb(cls):
         """Connect to MongoDB."""
         try:
-            cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
+            cls.client = AsyncMongoClient(settings.MONGODB_URL)
             cls.db = cls.client.get_database(settings.DB_NAME)
             cls.collection = cls.db.get_collection(settings.COLLECTION_NAME)
             logger.info("Connected to MongoDB")

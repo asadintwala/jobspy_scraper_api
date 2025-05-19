@@ -42,7 +42,8 @@ def handle_nan(value: Any) -> Any:
 async def get_jobs(
     site_name: str = Query(
         default="linkedin,indeed,glassdoor,google",
-        description="Job sites to search. Ex: linkedin,indeed,glassdoor,google,zip_recruiter,naukri,bayt",
+        description="""Job sites to search.
+        Ex: linkedin,indeed,glassdoor,google,zip_recruiter,naukri,bayt""",
     ),
     search_term: str = Query(
         default=None,
@@ -50,7 +51,8 @@ async def get_jobs(
     ),
     google_search_term: str = Query(
         default=None,
-        description="Specific search term for Google Jobs. Ex: software engineer jobs in New York since yesterday",
+        description="""Specific search term for Google Jobs.
+        Ex: software engineer jobs in New York since yesterday""",
     ),
     location: str = Query(
         default=None,
@@ -124,9 +126,9 @@ async def get_jobs(
 
     Args:
         This API enables users to search for job listings across multiple platforms with rich
-        filtering and customization options.It supports Google Jobs, LinkedIn, Indeed, Glassdoor, bayt,
-        naukri and zip_recruiter, offering flexibility for various job-hunting needslike
-        full time/part time/internships and that also in various locations.
+        filtering and customization options.It supports Google Jobs, LinkedIn, Indeed,
+        Glassdoor, Bayt, naukri and zip_recruiter, offering flexibility for various job-hunting
+        needs like full time/part time/internships and that also in various locations.
 
     Returns:
         List of job results as per described schema.
@@ -135,7 +137,8 @@ async def get_jobs(
         HTTPException: If there's an error in the search parameters or job scraping.
     """
     try:
-        logger.info("Starting job search with parameters: site_name=%s, search_term=%s, location=%s", site_name, search_term, location)
+        logger.info("Job search with parameters: site_name=%s, search_term=%s, location=%s",
+                    site_name, search_term, location)
 
         # Convert linkedin_company_ids from string to list
         if linkedin_company_ids:
@@ -151,19 +154,20 @@ async def get_jobs(
         total_jobs = 0
 
         # Iterate through all combinations of search parameters
-        for search_term in search_terms:
-            for location in locations:
-                for job_type in job_types:
-                    logger.info("Searching jobs with: term=%s, location=%s, type=%s", search_term, location, job_type)
+        for term in search_terms:
+            for loc in locations:
+                for jt in job_types:
+                    logger.info("Searching jobs with: term=%s, location=%s, type=%s",
+                                term, loc, jt)
 
                     # Validate parameters
                     params = JobSearchParams(
                         site_name=sites,
-                        search_term=search_term,
+                        search_term=term,
                         google_search_term=google_search_term,
-                        location=location,
+                        location=loc,
                         distance=distance,
-                        job_type=job_type,
+                        job_type=jt,
                         proxies=proxies,
                         is_remote=is_remote,
                         results_wanted=results_wanted,

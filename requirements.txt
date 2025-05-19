@@ -9,4 +9,4 @@ aiohttp
 tenacity
 pydantic_settings
 slowapi==0.1.8
-motor
+pymongo == 4.13.0
