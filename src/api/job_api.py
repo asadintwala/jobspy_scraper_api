@@ -11,9 +11,10 @@ from typing import List, Any
 import math
 import logging
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 from jobspy import scrape_jobs
 from src.models.job_models import DescriptionFormat, JobResponse, JobSearchParams
-from pydantic import BaseModel
+
 
 # Configure logging
 logging.basicConfig(
@@ -134,8 +135,8 @@ async def get_jobs(
         HTTPException: If there's an error in the search parameters or job scraping.
     """
     try:
-        logger.info(f"Starting job search with parameters: site_name={site_name}, search_term={search_term}, location={location}")
-        
+        logger.info("Starting job search with parameters: site_name=%s, search_term=%s, location=%s", site_name, search_term, location)
+
         # Convert linkedin_company_ids from string to list
         if linkedin_company_ids:
             linkedin_company_ids = [int(id.strip()) for id in linkedin_company_ids.split(",")]
@@ -153,8 +154,8 @@ async def get_jobs(
         for search_term in search_terms:
             for location in locations:
                 for job_type in job_types:
-                    logger.info(f"Searching jobs with: term={search_term}, location={location}, type={job_type}")
-                    
+                    logger.info("Searching jobs with: term=%s, location=%s, type=%s", search_term, location, job_type)
+
                     # Validate parameters
                     params = JobSearchParams(
                         site_name=sites,
@@ -181,7 +182,8 @@ async def get_jobs(
                     # Perform job search
                     jobs = scrape_jobs(**params.model_dump(exclude_none=True))
                     total_jobs += len(jobs)
-                    logger.info(f"Found {len(jobs)} jobs from current search")
+                    logger.info("Found %d jobs from current search", len(jobs))
+
 
                     # Convert to response model
                     for _, job in jobs.iterrows():
@@ -207,17 +209,16 @@ async def get_jobs(
                         )
                         all_results.append(result)
 
-        logger.info(f"Total jobs found: {total_jobs}")
+        logger.info("Total jobs found: %d", total_jobs)
         return JobSearchResponse(
             total_results=total_jobs,
             jobs=all_results
         )
 
     except ValueError as e:
-        logger.error(f"Validation error: {str(e)}")
+        logger.error("Validation error: %s", str(e))
         raise HTTPException(status_code=400, detail=str(e)) from e
-        
+
     except Exception as e:
-        logger.error(f"Unexpected error during job search: {str(e)}")
+        logger.error("Unexpected error during job search: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Error searching jobs: {str(e)}") from e
-    

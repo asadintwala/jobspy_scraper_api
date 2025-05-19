@@ -1,3 +1,11 @@
+# pylint: disable=duplicate-code
+# pylint: disable=too-many-lines
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-positional-arguments
+# pylint: disable=unused-argument
+
 """Job models for the API."""
 from enum import Enum
 from typing import List, Optional, Union
