@@ -10,7 +10,7 @@
 import logging
 import uuid
 from typing import Optional
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase, AsyncIOMotorCollection
 from src.core.config import settings
 from src.models.log_models import RequestLog
 
@@ -21,13 +21,15 @@ class MongoDB:
 
     client: Optional[AsyncIOMotorClient] = None
     db: Optional[AsyncIOMotorDatabase] = None
+    collection: Optional[AsyncIOMotorCollection] = None
 
     @classmethod
     async def connect_to_mongodb(cls):
         """Connect to MongoDB."""
         try:
             cls.client = AsyncIOMotorClient(settings.MONGODB_URL)
-            cls.db = cls.client[settings.DB_NAME]
+            cls.db = cls.client.get_database(settings.DB_NAME)
+            cls.collection = cls.db.get_collection(settings.COLLECTION_NAME)
             logger.info("Connected to MongoDB")
         except Exception as e:
             logger.error("Could not connect to MongoDB: %s", e)
@@ -43,12 +45,10 @@ class MongoDB:
     @classmethod
     async def log_request(cls, request_data: RequestLog):
         """Log request data to MongoDB."""
-        if cls.db is None:
+        if cls.collection is None:
             raise RuntimeError("MongoDB connection not initialized")
         try:
-            await cls.db[settings.COLLECTION_NAME].insert_one(
-                request_data.model_dump()
-            )
+            await cls.collection.insert_one(request_data.model_dump())
             logger.info("Successfully logged request %s", request_data.request_id)
         except Exception as e:
             logger.error("Failed to log request to MongoDB: %s", e)
@@ -57,7 +57,7 @@ class MongoDB:
     @classmethod
     async def get_logs(cls, skip: int = 0, limit: int = 100):
         """Retrieve logs from MongoDB."""
-        if cls.db is None:
+        if cls.collection is None:
             raise RuntimeError("MongoDB connection not initialized")
         try:
             # First check if collection exists
@@ -66,13 +66,12 @@ class MongoDB:
                 logger.warning("Collection %s does not exist", settings.COLLECTION_NAME)
                 return []
 
-            cursor = cls.db[settings.COLLECTION_NAME].find().skip(skip).limit(limit)
+            cursor = cls.collection.find().skip(skip).limit(limit)
             logs = await cursor.to_list(length=limit)
             logger.info("Retrieved %d logs from MongoDB", len(logs))
             return logs
         except Exception as e:
             logger.error("Failed to retrieve logs from MongoDB: %s", e)
-
             raise
 
 
