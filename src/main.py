@@ -14,6 +14,7 @@ from src.api.log_api import router as log_router
 from src.core.config import settings
 from src.core.logging import setup_logging
 from src.core.mongodb import MongoDB, RequestLogger
+from src.core.middleware import TimeoutMiddleware
 
 # Setup logging
 setup_logging()
@@ -34,6 +35,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Add timeout middleware
+app.add_middleware(TimeoutMiddleware, timeout_seconds=60)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):

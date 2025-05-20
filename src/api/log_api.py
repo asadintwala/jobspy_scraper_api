@@ -21,4 +21,9 @@ async def get_logs(
     Returns:
         List of log entries
     """
-    return await MongoDB.get_logs(skip=skip, limit=limit)
+    logs = await MongoDB.get_logs(skip=skip, limit=limit)
+    # Convert ObjectId to string in the response
+    for log in logs:
+        if '_id' in log:
+            log['_id'] = str(log['_id'])
+    return logs

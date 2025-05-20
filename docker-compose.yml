@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  app:
+    image: appscrip007/company-jobs-tools
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: company-jobs
+    ports:
+      - "8017:8017"
+    env_file:
+      - .env
+    networks:
+      - app-network
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "5"
+ 
+volumes:
+  mongodb_data:
+ 
+networks:
+  app-network:
+    driver: bridge

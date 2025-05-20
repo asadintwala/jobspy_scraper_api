@@ -3,10 +3,11 @@ uvicorn==0.27.1
 pydantic==2.6.1
 python-dotenv==1.0.1
 pytest==8.0.0
-black==24.1.1
-isort==5.13.2
-aiohttp
-tenacity
+black==24.1.1 # makes your Python code look clean and consistent
+isort==5.13.2 # sorts your Python import statements
+aiohttp # asynchronous HTTP requests (non-blocking)
+tenacity # A tool for retrying things when they fail
 pydantic_settings
-slowapi==0.1.8
-pymongo == 4.13.0
+slowapi==0.1.8 # for rate limiting
+pymongo == 4.13.0 # Driver for mongodb
+python-jobspy
